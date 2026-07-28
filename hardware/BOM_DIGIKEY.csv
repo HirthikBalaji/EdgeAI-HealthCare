@@ -1,0 +1,16 @@
+Item,Reference Designator,Component Description,Manufacturer,Manufacturer Part Number,DigiKey Part Number,Package / Case,Unit Price (USD),Quantity,Supplier Category
+1,U1,Dual Arm Cortex-M33 MCU + BLE 5.3 SoC,Nordic Semiconductor,NRF5340-QKAA-R,1490-NRF5340-QKAA-R-ND,aQFN-94 (7x7mm),4.85,1,MCU & Wireless
+2,U2,Single-Lead ECG Biopotential Front-End,Analog Devices,AD8232ACPZ-R7,AD8232ACPZ-R7CT-ND,LFCSP-20 (4x4mm),2.95,1,Analog Front-End
+3,U3,High-Sensitivity Optical Pulse Oximeter & Heart-Rate Sensor,Analog Devices / Maxim,MAX30102EFD+T,MAX30102EFD+TCT-ND,OESIP-14 (5.6x3.3mm),3.40,1,Optical Biosensors
+4,U4,6-DoF Ultra-Low-Power IMU with Machine Learning Core (MLC),STMicroelectronics,LSM6DSOXTR,497-19018-1-ND,LGA-14 (2.5x3.0mm),2.80,1,Intelligent Motion
+5,U5,High-Accuracy (±0.1°C) NIST-Traceable Clinical Temp Sensor,Texas Instruments,TMP117AIDRVR,296-TMP117AIDRVRCT-ND,WSON-6 (2x2mm),1.65,1,Thermal Sensing
+6,U6,64 Mbit (8 MB) Serial Quad SPI Flash Memory,Microchip Technology,SST26VF064B-104I/MF,SST26VF064B-104I/MF-ND,WDFN-8 (5x6mm),1.25,1,Non-Volatile Storage
+7,U7,Ultra-Low-Power Nano-Power Boost Charger & Buck Converter,Texas Instruments,BQ25570RGRR,296-36528-1-ND,VQFN-20 (3.5x3.5mm),3.10,1,Power Management
+8,U8,Haptic Driver for ERM/LRA Tactical Alerts,Texas Instruments,DRV2605LDGSR,296-38472-1-ND,VSSOP-10 (3x3mm),1.45,1,Tactile Haptics
+9,C1,High-Reliability 100mF 3.3V Supercapacitor,Murata Electronics,DMF3Z5R5H474M3DTA0,490-14282-1-ND,SMD (21x14mm),2.20,1,Supercapacitors
+10,J1,Micro-Coaxial Electrode Snap Connectors,TE Connectivity,2337019-1,A136894-ND,Snap-Fit Receptacle,0.85,3,Interconnects
+11,J2,Flexible Printed Circuit (FPC) 0.5mm Pitch Connector,Molex,505110-0891,WM13978CT-ND,SMD Bottom Contact,0.95,2,Interconnects
+12,LS1,Surface Mount Piezoelectric Audio Transducer,Murata Electronics,PKLCS1212E4001-R1,490-4691-1-ND,SMD (12x12mm),1.10,1,Audio Alerts
+13,B1,Rechargeable LiPo Cell 3.7V 180mAh with Protection PCB,Molex / JST,LIP-180-37-PCM,WM-LIP180-ND,Custom Pouch (20x25x4mm),3.50,1,Energy Storage
+14,ANT1,2.4 GHz Ceramic Chip Antenna for BLE 5.3,Murata Electronics,LDC182G4519B-327,490-17935-1-ND,0603 SMD,0.45,1,RF Components
+15,PASSIVES,0402/0603 Precision Resistors & Murata X7R Decoupling Caps,Murata / TE Connectivity,VARIOUS-PASSIVE-KIT,KIT-PASSIVE-0402-ND,0402 / 0603 SMD,1.80,1,Passives Kit
