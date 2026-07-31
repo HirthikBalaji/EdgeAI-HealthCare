@@ -1,0 +1,5 @@
+# VITALIS-Edge TinyML Pipeline Requirements
+numpy>=1.20.0
+scipy>=1.7.0
+matplotlib>=3.4.0
+scikit-learn>=0.24.0
