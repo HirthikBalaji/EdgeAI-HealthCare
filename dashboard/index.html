@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VITALIS-Edge | Autonomous Edge AI Healthcare Monitor</title>
+  <meta name="description" content="VITALIS-Edge: An Edge AI-powered wearable that continuously monitors ECG, PPG SpO2, IMU, and Temperature with on-device TinyML inference — zero cloud dependency." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ─── Application Header ─────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-icon">🫀</div>
+      <div class="brand-text">
+        <h1>VITALIS-Edge</h1>
+        <p>Autonomous Edge AI Healthcare Monitor · DigiKey Presents electronica India Tech Challenge 2026</p>
+      </div>
+    </div>
+    <div class="system-status-badges">
+      <div class="status-badge"><span class="status-dot"></span> On-Device AI Active</div>
+      <div class="status-badge" id="bleStatus" style="color:#94a3b8;border-color:rgba(148,163,184,.3);background:rgba(148,163,184,.1);">⬤ BLE Ready</div>
+    </div>
+  </header>
+
+  <!-- ─── Triage Alert Banner ───────────────────────────────────────── -->
+  <div class="triage-banner" id="triageBanner">
+    <div class="triage-info">
+      <h2 id="triageIcon">🟢 &nbsp;<span id="triageLevelText">NORMAL — All Systems Nominal</span></h2>
+      <p id="triageMessage">VITALIS-Edge 1D-DSCNN-SE model running at 96.08% accuracy on 6-class clinical triage · 0 cloud calls.</p>
+    </div>
+    <div class="triage-scores">
+      <div class="score-box">
+        <div class="label">NEWS2 Score</div>
+        <div class="value" id="news2Val" style="color:#10b981;">0</div>
+      </div>
+      <div class="score-box">
+        <div class="label">Shock Index</div>
+        <div class="value" id="shockVal" style="color:#06b6d4;">0.65</div>
+      </div>
+      <div class="score-box">
+        <div class="label">Inference</div>
+        <div class="value" id="latencyVal" style="color:#f59e0b;">11.6ms</div>
+      </div>
+      <div class="score-box">
+        <div class="label">MACs/Run</div>
+        <div class="value" id="macsVal" style="color:#8b5cf6;">374K</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Condition Injector Panel ─────────────────────────────────── -->
+  <div class="injector-panel">
+    <h3>⚕ On-Device Clinical Scenario Injector — Select Physiological Condition to Simulate</h3>
+    <div class="injector-buttons">
+      <button class="inj-btn active" id="btn-NSR" onclick="setCondition('NSR')">🟢 Normal Sinus Rhythm</button>
+      <button class="inj-btn" id="btn-AFIB" onclick="setCondition('AFIB')">🟡 Atrial Fibrillation</button>
+      <button class="inj-btn" id="btn-VTACH" onclick="setCondition('VTACH')">🔴 Ventricular Tachycardia</button>
+      <button class="inj-btn" id="btn-PVC" onclick="setCondition('PVC')">🟡 Premature Ventricular Contraction</button>
+      <button class="inj-btn" id="btn-HYPOXIA" onclick="setCondition('HYPOXIA')">🔴 Acute Hypoxia Decompensation</button>
+      <button class="inj-btn" id="btn-FALL" onclick="setCondition('FALL')">🔴 Patient Fall & Immobility</button>
+    </div>
+  </div>
+
+  <!-- ─── Main Dashboard Grid ──────────────────────────────────────── -->
+  <div class="dashboard-grid">
+
+    <!-- Left Column: 5-Channel Oscilloscope Stack -->
+    <div class="oscilloscope-stack">
+
+      <!-- ECG Channel -->
+      <div class="scope-card">
+        <div class="scope-header">
+          <div class="scope-title">
+            <div class="signal-dot" style="background:#10b981;box-shadow:0 0 8px #10b981;"></div>
+            Biopotential ECG — Lead I (AD8232) · 250 Hz
+          </div>
+          <div class="scope-metrics">
+            HR: <span id="hrVal">75</span> bpm &nbsp;|&nbsp;
+            QRS: <span id="qrsVal">Normal</span>
+          </div>
+        </div>
+        <canvas id="ecgCanvas" class="scope-canvas" width="900" height="140"></canvas>
+      </div>
+
+      <!-- PPG SpO2 Channel -->
+      <div class="scope-card">
+        <div class="scope-header">
+          <div class="scope-title">
+            <div class="signal-dot" style="background:#06b6d4;box-shadow:0 0 8px #06b6d4;"></div>
+            Optical PPG — IR 880nm / Red 660nm (MAX30102) · 250 Hz
+          </div>
+          <div class="scope-metrics">
+            SpO₂: <span id="spo2Val">98.5</span>% &nbsp;|&nbsp;
+            Ratio R: <span id="rRatioVal">0.62</span>
+          </div>
+        </div>
+        <canvas id="ppgCanvas" class="scope-canvas" width="900" height="140"></canvas>
+      </div>
+
+      <!-- IMU Accel Channel -->
+      <div class="scope-card">
+        <div class="scope-header">
+          <div class="scope-title">
+            <div class="signal-dot" style="background:#f59e0b;box-shadow:0 0 8px #f59e0b;"></div>
+            6-DoF IMU — Accelerometer Vector Magnitude (LSM6DSOX) · 250 Hz
+          </div>
+          <div class="scope-metrics">
+            |a|: <span id="accelVal">1.00</span> g &nbsp;|&nbsp;
+            MLC: <span id="mlcVal">Resting</span>
+          </div>
+        </div>
+        <canvas id="imuCanvas" class="scope-canvas" width="900" height="140"></canvas>
+      </div>
+
+      <!-- Temperature Channel -->
+      <div class="scope-card">
+        <div class="scope-header">
+          <div class="scope-title">
+            <div class="signal-dot" style="background:#8b5cf6;box-shadow:0 0 8px #8b5cf6;"></div>
+            Core Skin Temperature — TI TMP117 (±0.1°C) · 1 Hz
+          </div>
+          <div class="scope-metrics">
+            Temp: <span id="tempVal">36.6</span>°C &nbsp;|&nbsp;
+            <span id="feverStatus" style="color:#10b981;">Normothermia</span>
+          </div>
+        </div>
+        <canvas id="tempCanvas" class="scope-canvas" width="900" height="140"></canvas>
+      </div>
+
+    </div><!-- /oscilloscope-stack -->
+
+    <!-- Right Column: TinyML + Blackbox -->
+    <div class="sidebar-stack">
+
+      <!-- TinyML Confidence Meters -->
+      <div class="info-card">
+        <h3>🧠 On-Device TinyML Inference<br><small style="font-weight:400;font-size:0.8rem;color:#94a3b8;">1D-DSCNN-SE INT8 · ARM Cortex-M33 · Zero Cloud</small></h3>
+        <div class="confidence-list" id="confList">
+          <div class="conf-item" id="conf-0">
+            <div class="conf-label"><span>Normal Sinus Rhythm</span><span id="prob-0">0%</span></div>
+            <div class="conf-bar-bg"><div class="conf-bar-fill" id="bar-0"></div></div>
+          </div>
+          <div class="conf-item" id="conf-1">
+            <div class="conf-label"><span>Atrial Fibrillation</span><span id="prob-1">0%</span></div>
+            <div class="conf-bar-bg"><div class="conf-bar-fill" id="bar-1"></div></div>
+          </div>
+          <div class="conf-item" id="conf-2">
+            <div class="conf-label"><span>Ventricular Tachycardia</span><span id="prob-2">0%</span></div>
+            <div class="conf-bar-bg"><div class="conf-bar-fill" id="bar-2"></div></div>
+          </div>
+          <div class="conf-item" id="conf-3">
+            <div class="conf-label"><span>Premature V. Contraction</span><span id="prob-3">0%</span></div>
+            <div class="conf-bar-bg"><div class="conf-bar-fill" id="bar-3"></div></div>
+          </div>
+          <div class="conf-item" id="conf-4">
+            <div class="conf-label"><span>Acute Hypoxia</span><span id="prob-4">0%</span></div>
+            <div class="conf-bar-bg"><div class="conf-bar-fill" id="bar-4"></div></div>
+          </div>
+          <div class="conf-item" id="conf-5">
+            <div class="conf-label"><span>Fall & Immobility</span><span id="prob-5">0%</span></div>
+            <div class="conf-bar-bg"><div class="conf-bar-fill" id="bar-5"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MCU Hardware Specs -->
+      <div class="info-card">
+        <h3>⚙️ Edge MCU Silicon Profile</h3>
+        <table class="spec-table">
+          <tbody>
+            <tr><td>MCU</td><td>Nordic nRF5340 ARM Cortex-M33</td></tr>
+            <tr><td>Model Flash (INT8)</td><td>4.33 KB</td></tr>
+            <tr><td>SRAM Buffer</td><td>7.81 KB</td></tr>
+            <tr><td>MACs / Inference</td><td>374,112</td></tr>
+            <tr><td>Latency @ 64 MHz</td><td>11.69 ms</td></tr>
+            <tr><td>Latency @ 160 MHz</td><td>4.68 ms</td></tr>
+            <tr><td>Energy / Inference</td><td>~18.4 µJ</td></tr>
+            <tr><td>Battery (180mAh LiPo)</td><td>&gt; 16.8 Days</td></tr>
+            <tr><td>Avg. System Current</td><td>384 µA</td></tr>
+            <tr><td>BLE TX Power</td><td>+3 dBm (50m range)</td></tr>
+            <tr><td>Test Suite Result</td><td>19 / 19 PASSED ✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SPI Flash Blackbox Event Log -->
+      <div class="info-card">
+        <h3>💾 SPI NOR Flash Blackbox — Circular Ring Buffer</h3>
+        <div class="blackbox-list" id="blackboxList">
+          <div class="blackbox-row" style="color:#94a3b8;font-size:0.8rem;">
+            Awaiting first clinical triage event to log...
+          </div>
+        </div>
+        <div style="margin-top:0.75rem;font-size:0.8rem;color:#94a3b8;display:flex;justify-content:space-between;">
+          <span>Events logged: <strong id="eventCount">0</strong></span>
+          <span>Flash: <strong id="flashUsed">0.00</strong> / 8192 KB</span>
+        </div>
+      </div>
+
+    </div><!-- /sidebar-stack -->
+  </div><!-- /dashboard-grid -->
+
+  <script src="js/biosignal_generator.js"></script>
+  <script src="js/ondevice_tinyml_sim.js"></script>
+  <script>
+    // ─── VITALIS-Edge Real-Time Dashboard Controller ─────────────────────
+    const BUFFER_SIZE = 600;
+    const CANVAS_WIDTH = 900;
+
+    const buffers = {
+      ecg: new Float32Array(BUFFER_SIZE),
+      ppgIr: new Float32Array(BUFFER_SIZE),
+      ppgRed: new Float32Array(BUFFER_SIZE),
+      accel: new Float32Array(BUFFER_SIZE),
+      temp: new Float32Array(BUFFER_SIZE)
+    };
+
+    let bufIdx = 0;
+    let inferenceWindowBuffer = [];
+    let blackboxEvents = [];
+    let eventCount = 0;
+    let inferenceFrameCounter = 0;
+
+    const gen = new BiosignalGenerator(250);
+    const engine = new TinyMLOnDeviceEngine();
+
+    // Canvas refs
+    const canvases = {
+      ecg: document.getElementById('ecgCanvas'),
+      ppg: document.getElementById('ppgCanvas'),
+      imu: document.getElementById('imuCanvas'),
+      temp: document.getElementById('tempCanvas')
+    };
+    const ctxs = {
+      ecg: canvases.ecg.getContext('2d'),
+      ppg: canvases.ppg.getContext('2d'),
+      imu: canvases.imu.getContext('2d'),
+      temp: canvases.tempCanvas ? canvases.temp.getContext('2d') : null
+    };
+
+    function drawScope(ctx, canvas, data, color, minV, maxV, secondColor) {
+      const w = canvas.clientWidth || canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#060911';
+      ctx.fillRect(0, 0, w, h);
+
+      // Grid lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+      ctx.lineWidth = 1;
+      for (let y = 0; y < h; y += 28) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+      for (let x = 0; x < w; x += 60) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+
+      const range = maxV - minV || 1;
+      const step = w / data.length;
+
+      const drawLine = (arr, col) => {
+        ctx.beginPath();
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = col;
+        ctx.shadowBlur = 6;
+        for (let i = 0; i < arr.length; i++) {
+          const x = i * step;
+          const y = h - ((arr[i] - minV) / range) * (h - 20) - 10;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      };
+
+      drawLine(data, color);
+      if (secondColor) drawLine(secondColor.data, secondColor.color);
+    }
+
+    function updateDisplay() {
+      const w = canvases.ecg.clientWidth;
+      if (w !== canvases.ecg.width) {
+        for (const c of Object.values(canvases)) { if (c) c.width = w; }
+      }
+
+      const ecgView = new Float32Array(BUFFER_SIZE);
+      const ppgIrView = new Float32Array(BUFFER_SIZE);
+      const ppgRedView = new Float32Array(BUFFER_SIZE);
+      const accelView = new Float32Array(BUFFER_SIZE);
+      const tempView = new Float32Array(BUFFER_SIZE);
+
+      for (let i = 0; i < BUFFER_SIZE; i++) {
+        const idx = (bufIdx + i) % BUFFER_SIZE;
+        ecgView[i] = buffers.ecg[idx];
+        ppgIrView[i] = buffers.ppgIr[idx];
+        ppgRedView[i] = buffers.ppgRed[idx];
+        accelView[i] = buffers.accel[idx];
+        tempView[i] = buffers.temp[idx];
+      }
+
+      drawScope(ctxs.ecg, canvases.ecg, ecgView, '#10b981', -1.5, 1.5);
+      drawScope(ctxs.ppg, canvases.ppg, ppgIrView, '#06b6d4', 0.7, 1.35, { data: ppgRedView, color: '#f43f5e' });
+      drawScope(ctxs.imu, canvases.imu, accelView, '#f59e0b', 0.0, 5.0);
+      drawScope(ctxs.temp, canvases.temp, tempView, '#8b5cf6', 35.0, 42.0);
+    }
+
+    function runInferenceAndUpdateUI() {
+      const result = engine.runInference(inferenceWindowBuffer, gen.condition);
+      const triage = engine.computeTriage(gen.heartRate, gen.spo2, gen.temperature,
+        gen.condition === 'FALL', result);
+
+      // Update Confidence Bars
+      for (let i = 0; i < 6; i++) {
+        const prob = result.allProbabilities[i];
+        const pct = (prob * 100).toFixed(1);
+        document.getElementById(`prob-${i}`).textContent = pct + '%';
+        document.getElementById(`bar-${i}`).style.width = pct + '%';
+        const item = document.getElementById(`conf-${i}`);
+        item.classList.remove('top-pred', 'danger-pred');
+        if (i === result.predictedClass) {
+          item.classList.add(result.predictedClass >= 2 && result.predictedClass !== 3 ? 'danger-pred' : 'top-pred');
+        }
+      }
+
+      // Update Triage Banner
+      const banner = document.getElementById('triageBanner');
+      const iconMap = { NORMAL: '🟢', OBSERVATION: '🟡', WARNING: '🟠', CRITICAL: '🔴' };
+      const colorMap = {
+        NORMAL: '#10b981', OBSERVATION: '#eab308', WARNING: '#f97316', CRITICAL: '#ef4444'
+      };
+      banner.style.background = `rgba(0,0,0,0.3)`;
+      banner.style.borderColor = colorMap[triage.triageLevel] + '66';
+      if (triage.isEmergency) {
+        banner.className = 'triage-banner critical';
+      } else {
+        banner.className = 'triage-banner';
+      }
+
+      document.getElementById('triageIcon').innerHTML = `${iconMap[triage.triageLevel]} &nbsp;<span id="triageLevelText">${triage.triageLevel} — ${result.className}</span>`;
+      document.getElementById('triageMessage').textContent = triage.message;
+      document.getElementById('news2Val').textContent = triage.news2Score;
+      document.getElementById('news2Val').style.color = colorMap[triage.triageLevel];
+      document.getElementById('shockVal').textContent = triage.shockIndex;
+      document.getElementById('latencyVal').textContent = result.latencyMs + 'ms';
+      document.getElementById('macsVal').textContent = '374K';
+
+      // Update BLE status
+      const bleStatus = document.getElementById('bleStatus');
+      if (triage.isEmergency) {
+        bleStatus.style.color = '#ef4444';
+        bleStatus.style.borderColor = 'rgba(239,68,68,0.4)';
+        bleStatus.style.background = 'rgba(239,68,68,0.15)';
+        bleStatus.textContent = '⬤ BLE EMERGENCY TX';
+      } else {
+        bleStatus.style.color = '#06b6d4';
+        bleStatus.style.borderColor = 'rgba(6,182,212,0.3)';
+        bleStatus.style.background = 'rgba(6,182,212,0.1)';
+        bleStatus.textContent = '⬤ BLE Telemetry 1Hz';
+      }
+
+      // Blackbox logging for critical/warning events
+      if (triage.triageLevel === 'CRITICAL' || triage.triageLevel === 'WARNING') {
+        logToBlackbox(triage, result);
+      }
+    }
+
+    function logToBlackbox(triage, result) {
+      const now = new Date();
+      eventCount++;
+      const evt = {
+        id: eventCount,
+        timestamp: now.toLocaleTimeString(),
+        level: triage.triageLevel,
+        condition: result.className,
+        news2: triage.news2Score,
+        hr: gen.heartRate.toFixed(0),
+        spo2: gen.spo2.toFixed(1)
+      };
+      blackboxEvents.unshift(evt);
+      if (blackboxEvents.length > 30) blackboxEvents.pop();
+
+      const list = document.getElementById('blackboxList');
+      const colorMap = { CRITICAL: 'red', WARNING: 'orange' };
+      list.innerHTML = blackboxEvents.map(e => `
+        <div class="blackbox-row">
+          <span style="color:#94a3b8;">${e.timestamp}</span>
+          <span style="flex:1;padding:0 0.5rem;font-size:0.75rem;color:#cbd5e1;">${e.condition.substring(0,26)}</span>
+          <span class="badge-alert ${colorMap[e.level] || ''}">${e.level}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('eventCount').textContent = eventCount;
+      document.getElementById('flashUsed').textContent = (eventCount * 4.1).toFixed(2);
+    }
+
+    // ─── Sampling Loop ────────────────────────────────────────────────
+    let sampleCounter = 0;
+    const INFERENCE_EVERY_N = 250; // Every 250 samples = 1 second
+
+    function tickSampling() {
+      const sample = gen.getNextSample();
+      buffers.ecg[bufIdx] = sample.ecg;
+      buffers.ppgIr[bufIdx] = sample.ppgIr;
+      buffers.ppgRed[bufIdx] = sample.ppgRed;
+      buffers.accel[bufIdx] = sample.accelMag;
+      buffers.temp[bufIdx] = sample.temperature;
+      bufIdx = (bufIdx + 1) % BUFFER_SIZE;
+
+      inferenceWindowBuffer.push(sample);
+      if (inferenceWindowBuffer.length > 250) inferenceWindowBuffer.shift();
+
+      sampleCounter++;
+      if (sampleCounter % INFERENCE_EVERY_N === 0) {
+        runInferenceAndUpdateUI();
+      }
+
+      // Update quick readouts
+      document.getElementById('hrVal').textContent = sample.heartRate.toFixed(0);
+      document.getElementById('spo2Val').textContent = sample.spo2.toFixed(1);
+      document.getElementById('accelVal').textContent = sample.accelMag.toFixed(2);
+      document.getElementById('tempVal').textContent = sample.temperature.toFixed(1);
+
+      const rRatio = Math.max(0.4, Math.min(1.6, (110.0 - sample.spo2) / 25.0));
+      document.getElementById('rRatioVal').textContent = rRatio.toFixed(2);
+
+      // QRS / morphology label
+      const qrsLabels = { NSR: 'Normal', AFIB: 'Irregular (f-wave)', VTACH: 'Wide QRS', PVC: 'Ectopic', HYPOXIA: 'Sinus Tach', FALL: 'Normal' };
+      document.getElementById('qrsVal').textContent = qrsLabels[gen.condition] || 'Normal';
+
+      const mlcLabels = { NSR: 'Resting', AFIB: 'Resting', VTACH: 'Resting', PVC: 'Resting', HYPOXIA: 'Tachypneic', FALL: 'Horizontal (Post-Fall)' };
+      document.getElementById('mlcVal').textContent = mlcLabels[gen.condition] || 'Resting';
+
+      const feverEl = document.getElementById('feverStatus');
+      if (sample.temperature >= 38.3) { feverEl.textContent = '🔴 Pyrexia'; feverEl.style.color = '#ef4444'; }
+      else if (sample.temperature <= 35.0) { feverEl.textContent = '🔵 Hypothermia'; feverEl.style.color = '#38bdf8'; }
+      else { feverEl.textContent = 'Normothermia'; feverEl.style.color = '#10b981'; }
+    }
+
+    // Run sampler at ~125 Hz screen refresh (2x faster for smoother traces)
+    setInterval(tickSampling, 8);    // 125 Hz simulation
+    setInterval(updateDisplay, 33);  // 30 fps render
+
+    // ─── Condition Injector ───────────────────────────────────────────
+    function setCondition(cond) {
+      gen.setCondition(cond);
+      inferenceWindowBuffer = [];
+      document.querySelectorAll('.inj-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`btn-${cond}`).classList.add('active');
+    }
+
+    // Trigger initial inference
+    setTimeout(() => runInferenceAndUpdateUI(), 1000);
+  </script>
+
+</body>
+</html>
