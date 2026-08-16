@@ -1,0 +1,124 @@
+VITALIS-Edge Demo Video Script
+DigiKey Presents electronica India Tech Challenge 2026
+============================================================
+
+DURATION: 3 minutes 30 seconds (recommended demo video length)
+
+------------------------------------------------------------
+[00:00 – 00:15] OPENING — Problem Hook
+
+NARRATOR (over heartbeat waveform animation):
+"Every 12 seconds, someone in India dies from a cardiac event that could have been 
+caught earlier. 85% of these deaths happen outside hospital settings — in homes, 
+ambulances, rural clinics — where cloud-connected monitoring fails."
+
+Visual: Map of India showing rural areas. Cut to a hospital with no cardiac monitors.
+
+------------------------------------------------------------
+[00:15 – 00:45] SOLUTION REVEAL
+
+NARRATOR:
+"Introducing VITALIS-Edge — an autonomous Edge AI healthcare wearable that makes 
+real-time clinical decisions on the device itself. No cloud. No internet. No delay."
+
+Visual: The VITALIS-Edge patch on a patient's chest. Dashboard boots up showing 
+live oscilloscope traces for ECG, PPG, IMU, and temperature.
+
+Text overlay: "5 sensors. 1 neural network. Zero cloud calls."
+
+------------------------------------------------------------
+[00:45 – 01:30] LIVE DEMO — Dashboard Walk-Through
+
+NARRATOR:
+"Here's our real-time web dashboard running the in-browser simulation of our 
+on-device biosignal generator and TinyML engine."
+
+Visual: Browser dashboard showing:
+- 4-channel oscilloscope: ECG Lead I, PPG IR/Red, IMU accel, Temperature
+- Right panel: TinyML confidence bars showing "Normal Sinus Rhythm — 96.8%"
+- NEWS2 score: 0. Shock Index: 0.65. Inference latency: 11.6ms
+
+NARRATOR:
+"Our 1D Depthwise Separable CNN with Squeeze-and-Excitation runs in just 11.69 
+milliseconds on the Nordic nRF5340 ARM Cortex-M33 — consuming only 4.33 kilobytes 
+of flash memory."
+
+------------------------------------------------------------
+[01:30 – 02:10] CLINICAL SCENARIO INJECTION
+
+NARRATOR:
+"Let's inject a real clinical emergency scenario — Ventricular Tachycardia."
+
+DEMO ACTION: Click "Ventricular Tachycardia" button on dashboard.
+
+Visual: ECG trace immediately shifts to wide, sinusoidal monomorphic QRS waveforms 
+at ~180 bpm. PPG amplitude drops (reduced stroke volume). TinyML confidence bars 
+rapidly update — V-Tach rises to 97.4%.
+
+The triage banner turns RED and pulses:
+"🔴 CRITICAL — Ventricular Tachycardia detected! Initiating local emergency alarm 
+and BLE emergency beacon broadcast."
+
+BLE status badge changes to "⬤ BLE EMERGENCY TX"
+
+NARRATOR:
+"The patch detects V-Tach, escalates to Level 3 CRITICAL, fires the piezo alarm, 
+triggers haptic feedback, and broadcasts a direct BLE emergency beacon receivable 
+by any smartphone within 50 meters — all within 12 milliseconds, entirely offline."
+
+------------------------------------------------------------
+[02:10 – 02:40] HARDWARE ARCHITECTURE
+
+NARRATOR:
+"The hardware stack uses components exclusively available on DigiKey India:"
+
+Visual: Component diagram showing:
+- Nordic nRF5340 dual ARM Cortex-M33 + BLE 5.3
+- Analog Devices AD8232 ECG front-end
+- Maxim/ADI MAX30102 optical PPG
+- ST LSM6DSOX 6-DoF IMU with Machine Learning Core
+- Texas Instruments TMP117 ±0.1°C precision temperature
+- Microchip SST26VF064B 8MB SPI flash blackbox recorder
+
+NARRATOR:
+"The total BOM cost is approximately $28 USD — versus $500-2,000 for a traditional 
+Holter monitor — making hospital-grade cardiac monitoring accessible across India."
+
+------------------------------------------------------------
+[02:40 – 03:10] TRAINING PIPELINE & BENCHMARKS
+
+NARRATOR:
+"Our PyTorch training pipeline generates 2,400 multi-modal biosignal windows across 
+6 clinical classes, trains in 40 epochs with AdamW, fuses BatchNorm layers, and 
+exports quantized INT8 C headers directly for the firmware."
+
+Visual: Terminal showing training output:
+  FP32 Model Accuracy: 100.00%
+  INT8 Quantized Accuracy: 96.08%
+  Macro F1-Score: 96.03%
+
+Visual: Firmware test output:
+  TEST SUITE SUMMARY: 19 PASSED, 0 FAILED
+
+NARRATOR:
+"19 out of 19 firmware unit tests pass — covering DSP filters, SpO2 computation, 
+fall detection, TinyML inference, NEWS2 triage scoring, and flash blackbox integrity."
+
+------------------------------------------------------------
+[03:10 – 03:30] CLOSING
+
+NARRATOR:
+"VITALIS-Edge proves that life-saving clinical intelligence doesn't need the cloud.
+It needs to be at the edge — on the patient, in real time, everywhere."
+
+Text overlay:
+  96.08% Accuracy | 4.33 KB Flash | 11.69 ms Latency
+  16.8 Day Battery | Zero Cloud | 19/19 Tests Passed
+
+NARRATOR:
+"VITALIS-Edge. Autonomous Edge AI Healthcare. Built for India."
+
+Visual: VITALIS-Edge logo. DigiKey electronica India Tech Challenge 2026 branding.
+
+============================================================
+END OF SCRIPT
