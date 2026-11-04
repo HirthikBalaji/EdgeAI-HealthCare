@@ -14,3 +14,9 @@ venv/
 *.out
 test_vitalis
 *.log
+
+# Auto-added safety ignores
+*.pem
+*.key
+.env
+.env.local
